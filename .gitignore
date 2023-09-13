@@ -21,3 +21,6 @@
 go.work
 
 chessbic
+
+*/.env
+.env
