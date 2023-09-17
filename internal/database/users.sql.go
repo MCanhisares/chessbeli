@@ -12,32 +12,82 @@ import (
 	"github.com/google/uuid"
 )
 
-const createuser = `-- name: Createuser :one
-INSERT INTO users(id, created_at, updated_at, name)
-VALUES ($1, $2, $3, $4)
-RETURNING id, created_at, updated_at, name
+const authenticate = `-- name: Authenticate :one
+SELECT id, username
+FROM users
+WHERE email = $1
+AND password = crypt($2, password)
 `
 
-type CreateuserParams struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
+type AuthenticateParams struct {
+	Email string
+	Password string
 }
 
-func (q *Queries) Createuser(ctx context.Context, arg CreateuserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createuser,
+type AuthenticateRow struct {
+	ID       uuid.UUID
+	Username string
+}
+
+func (q *Queries) Authenticate(ctx context.Context, arg AuthenticateParams) (AuthenticateRow, error) {
+	row := q.db.QueryRowContext(ctx, authenticate, arg.Email, arg.Password)
+	var i AuthenticateRow
+	err := row.Scan(&i.ID, &i.Username)
+	return i, err
+}
+
+const createUser = `-- name: CreateUser :one
+INSERT INTO users(id, email, password, created_at, updated_at, username)
+VALUES ($1, $2, crypt($3, gen_salt('bf')), $4, $5, $6)
+RETURNING id, email, password, created_at, updated_at, username
+`
+
+type CreateUserParams struct {
+	ID        uuid.UUID
+	Email     string
+	Crypt     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Username  string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
 		arg.ID,
+		arg.Email,
+		arg.Crypt,
 		arg.CreatedAt,
 		arg.UpdatedAt,
-		arg.Name,
+		arg.Username,
 	)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
+		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
+		&i.Username,
+	)
+	return i, err
+}
+
+const selectUser = `-- name: SelectUser :one
+SELECT id, email, password, created_at, updated_at, username
+FROM users
+WHERE email = $1
+`
+
+func (q *Queries) SelectUser(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, selectUser, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Username,
 	)
 	return i, err
 }

@@ -12,7 +12,9 @@ import (
 
 type User struct {
 	ID        uuid.UUID
+	Email     string
+	Password  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      string
+	Username  string
 }
