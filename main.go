@@ -11,15 +11,12 @@ import (
 
 	"github.com/MCanhisares/chessbeli/internal/database"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/cors"
-
-	// "github.com/go-oauth2/oauth2/v4"
+	"github.com/go-chi/cors"	
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
-	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
+	"github.com/golang-jwt/jwt"	
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
